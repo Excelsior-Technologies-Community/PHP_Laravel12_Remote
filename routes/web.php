@@ -2,13 +2,20 @@
 
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\RemoteController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
-// Home route
+
 Route::get('/', function () {
-    return redirect()->route('products.index');
+    return view('welcome');
 });
+
+Route::get('/remote', [RemoteController::class, 'index'])->name('remote.index');
+Route::post('/remote', [RemoteController::class, 'execute'])->name('remote.execute');
+Route::post('/remote/clear', [RemoteController::class, 'clearOutput'])->name('remote.clear');
+
+Route::post('/history/{history}/rerun',[RemoteController::class,'rerun'])->name('history.rerun');
 
 // Product routes
 Route::resource('products', ProductController::class);
