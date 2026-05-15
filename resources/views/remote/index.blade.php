@@ -3,145 +3,363 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remote Command Executor</title>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Remote Command Center</title>
+
     <style>
-        /* Base Reset */
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
             font-family: 'Fira Code', 'Courier New', monospace;
         }
 
         body {
-            background-color: #0f111a;
-            /* Very dark background */
+            background: #0f111a;
             color: #cfd4dc;
-            /* Soft gray text */
-            display: flex;
-            justify-content: center;
-            align-items: center;
             min-height: 100vh;
-            padding: 20px;
+            padding: 30px;
         }
 
         .container {
-            background-color: #1b1f2a;
-            /* Dark card */
-            padding: 30px;
-            border-radius: 10px;
-            width: 100%;
-            max-width: 650px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.6);
+            max-width: 1000px;
+            margin: auto;
         }
 
         h1 {
             text-align: center;
             margin-bottom: 25px;
-            font-size: 28px;
             color: #8ab4f8;
-            /* Soft professional blue */
+        }
+
+        .card {
+            background: #1b1f2a;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow:
+                0 5px 20px rgba(0, 0, 0, .5);
         }
 
         form {
             display: flex;
-            margin-bottom: 15px;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
-        input[type="text"] {
+        input {
             flex: 1;
-            padding: 12px 15px;
-            font-size: 16px;
-            border: 1px solid #2c313e;
-            border-right: none;
-            border-radius: 6px 0 0 6px;
-            background-color: #161b26;
-            color: #cfd4dc;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #161b26;
+            color: white;
             outline: none;
         }
 
-        input[type="text"]::placeholder {
-            color: #7a7f8c;
-        }
-
         button {
-            padding: 12px 20px;
+            padding: 14px 20px;
             border: none;
-            font-weight: bold;
+            border-radius: 8px;
             cursor: pointer;
-            background-color: #2a2e3e;
-            /* Dark gray button */
-            color: #cfd4dc;
-            transition: all 0.3s;
-            border-radius: 0 6px 6px 0;
+            color: white;
+            transition: .3s;
         }
 
-        button:hover {
-            background-color: #3a3f52;
+        .execute {
+            background: #2563eb;
         }
 
-        .clear-btn {
+        .execute:hover {
+            background: #1d4ed8;
+        }
+
+        .clear {
+            background: #dc2626;
             width: 100%;
-            margin-top: 10px;
-            border-radius: 6px;
-            background-color: #3b3f50;
-            /* Slightly different dark gray */
+            margin-top: 15px;
         }
 
-        .clear-btn:hover {
-            background-color: #4c5163;
+        .clear:hover {
+            background: #b91c1c;
         }
 
         h3 {
-            margin-top: 20px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             color: #8ab4f8;
         }
 
-        pre {
-            background-color: #161b26;
-            /* Terminal style */
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #2c313e;
-            overflow-x: auto;
-            font-size: 16px;
-            color: #cfd4dc;
+        .quick {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
-        @media (max-width: 500px) {
+        .quick button {
+            background: #334155;
+        }
+
+        .quick button:hover {
+            background: #475569;
+        }
+
+        pre {
+            background: black;
+            color: #00ff7f;
+            padding: 20px;
+            border-radius: 10px;
+            overflow: auto;
+            min-height: 100px;
+        }
+
+        .history-item {
+            background: #161b26;
+            padding: 15px;
+            border-left: 4px solid #06b6d4;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .rerun-btn {
+            background: #0891b2;
+            padding: 8px 15px;
+        }
+
+        .rerun-btn:hover {
+            background: #0e7490;
+        }
+
+        small {
+            color: #94a3b8;
+        }
+
+        @media(max-width:768px) {
+
             form {
                 flex-direction: column;
             }
 
-            input[type="text"],
-            button {
-                border-radius: 6px;
-                margin-bottom: 10px;
+            .history-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
             }
+
         }
     </style>
+
 </head>
 
 <body>
+
     <div class="container">
-        <h1>Remote Command Executor</h1>
 
-        <form method="POST" action="{{ route('remote.execute') }}">
-            @csrf
-            <input type="text" name="command" placeholder="Enter command" required>
-            <button type="submit">Execute</button>
-        </form>
+        <h1>
+            🚀 Remote Command Center
+        </h1>
 
-        <form method="POST" action="{{ route('remote.clear') }}">
-            @csrf
-            <button type="submit" class="clear-btn">Clear Output</button>
-        </form>
 
-        <h3>Output:</h3>
-        <pre>{{ $output ?: 'No output yet' }}</pre>
+        <div class="card">
+
+            <form
+                method="POST"
+                action="{{route('remote.execute')}}">
+
+                @csrf
+
+                <input
+                    id="commandInput"
+                    name="command"
+                    placeholder="Enter command..."
+                    required>
+
+                <button
+                    class="execute">
+
+                    Execute
+
+                </button>
+
+            </form>
+
+
+            <form
+                method="POST"
+                action="{{route('remote.clear')}}">
+
+                @csrf
+
+                <button
+                    class="clear">
+
+                    Clear Output
+
+                </button>
+
+            </form>
+
+        </div>
+
+
+
+        <div class="card">
+
+            <h3>
+                ⚡ Quick Commands
+            </h3>
+
+            <div class="quick">
+
+                <button
+                    type="button"
+                    onclick="setCommand('pwd')">
+
+                    pwd
+
+                </button>
+
+                <button
+                    type="button"
+                    onclick="setCommand('ls')">
+
+                    ls
+
+                </button>
+
+                <button
+                    type="button"
+                    onclick="setCommand('whoami')">
+
+                    whoami
+
+                </button>
+
+                <button
+                    type="button"
+                    onclick="setCommand('php artisan migrate')">
+
+                    migrate
+
+                </button>
+
+                <button
+                    type="button"
+                    onclick="setCommand('php artisan cache:clear')">
+
+                    cache clear
+
+                </button>
+
+                <button
+                    type="button"
+                    onclick="setCommand('php artisan optimize:clear')">
+
+                    optimize clear
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="card">
+
+            <h3>
+                💻 Terminal Output
+            </h3>
+
+            <pre>
+
+            {{$output ?: 'No output yet'}}
+
+            </pre>
+
+        </div>
+
+
+
+        <div class="card">
+
+            <h3>
+                🕒 Recent History
+            </h3>
+
+            @forelse($history as $item)
+
+            <div class="history-item">
+
+                <div class="history-header">
+
+                    <div>
+
+                        <b>
+
+                            {{$item->command}}
+
+                        </b>
+
+                        <br>
+
+                        <small>
+
+                            {{$item->created_at->diffForHumans()}}
+
+                        </small>
+
+                    </div>
+
+
+                    <form
+                        method="POST"
+                        action="{{route('history.rerun',$item)}}">
+
+                        @csrf
+
+                        <button
+                            class="rerun-btn">
+
+                            Run Again
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+            @empty
+
+            <p>
+                No command history yet
+            </p>
+
+            @endforelse
+
+        </div>
+
     </div>
+
+    <script>
+        function setCommand(command) {
+            document
+                .getElementById(
+                    'commandInput'
+                )
+                .value = command;
+        }
+    </script>
+
 </body>
 
 </html>
